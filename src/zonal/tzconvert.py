@@ -15,20 +15,20 @@
 #    limitations under the License.
 ##
 
-from __future__ import with_statement
-from __future__ import print_function
+
+
 
 from pycalendar.icalendar.calendar import Calendar
 from xml.etree.cElementTree import ParseError as XMLParseError
-import cStringIO as StringIO
+import io as StringIO
 import getopt
 import os
-import rule
+from . import rule
 import sys
 import tarfile
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import xml.etree.cElementTree as XML
-import zone
+from . import zone
 
 """
 Classes to parse a tzdata files and generate VTIMEZONE data.
@@ -144,7 +144,7 @@ class tzconvert(object):
         """
 
         cal = Calendar()
-        for tzzone in self.zones.itervalues():
+        for tzzone in self.zones.values():
             if filterzones and tzzone.name not in filterzones:
                 continue
             vtz = tzzone.vtimezone(cal, self.rules, minYear, maxYear)
@@ -164,7 +164,7 @@ class tzconvert(object):
         except OSError:
             pass
 
-        for tzzone in self.zones.itervalues():
+        for tzzone in self.zones.values():
             if filterzones and tzzone.name not in filterzones:
                 continue
             cal = Calendar()
@@ -185,7 +185,7 @@ class tzconvert(object):
                 self.parseWindowsAliases(windowsAliases)
 
             link_list = []
-            for linkTo, linkFrom in sorted(self.links.iteritems(), key=lambda x: x[0]):
+            for linkTo, linkFrom in sorted(iter(self.links.items()), key=lambda x: x[0]):
 
                 # Check for existing output file
                 fromPath = os.path.join(outputdir, linkFrom + ".ics")
@@ -274,7 +274,7 @@ if __name__ == '__main__':
         print("Downloading and extracting IANA timezone database")
         os.mkdir(zonedir)
         iana = "https://www.iana.org/time-zones/repository/tzdata-latest.tar.gz"
-        data = urllib.urlretrieve(iana)
+        data = urllib.request.urlretrieve(iana)
         print("Extract data at: %s" % (data[0]))
         with tarfile.open(data[0], "r:gz") as t:
             t.extractall(zonedir)
@@ -283,8 +283,8 @@ if __name__ == '__main__':
         windowsAliases = os.path.join(rootdir, "windowsZones.xml")
     if not os.path.exists(windowsAliases):
         print("Downloading Unicode database")
-        unicode = "http://unicode.org/repos/cldr/tags/latest/common/supplemental/windowsZones.xml"
-        data = urllib.urlretrieve(unicode, windowsAliases)
+        str = "http://unicode.org/repos/cldr/tags/latest/common/supplemental/windowsZones.xml"
+        data = urllib.request.urlretrieve(str, windowsAliases)
 
     Calendar.sProdID = prodid
 

@@ -21,8 +21,8 @@ from pycalendar.icalendar.vtimezone import VTimezone
 from pycalendar.icalendar.vtimezonedaylight import Daylight
 from pycalendar.icalendar.vtimezonestandard import Standard
 from pycalendar.utcoffsetvalue import UTCOffsetValue
-import rule
-import utils
+from . import rule
+from . import utils
 
 """
 Class that maintains a TZ data Zone.
@@ -202,7 +202,7 @@ class Zone(object):
                     # Accumulate tzrule portions with the same offset pairs
                     lastOffsetPair = (rulemap[tzrule][0][1], rulemap[tzrule][0][2],)
                     startIndex = 0
-                    for index in xrange(len(rulemap[tzrule])):
+                    for index in range(len(rulemap[tzrule])):
                         offsetPair = (rulemap[tzrule][index][1], rulemap[tzrule][index][2],)
                         if offsetPair != lastOffsetPair:
                             tzrule.vtimezone(
@@ -280,7 +280,7 @@ class Zone(object):
                 similarMap.setdefault(key, []).append(item)
 
         # Merge similar
-        for values in similarMap.itervalues():
+        for values in similarMap.values():
             if len(values) > 1:
                 mergeTo = values[0]
                 for mergeFrom in values[1:]:

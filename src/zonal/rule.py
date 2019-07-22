@@ -22,7 +22,7 @@ from pycalendar.icalendar.vtimezonedaylight import Daylight
 from pycalendar.icalendar.vtimezonestandard import Standard
 from pycalendar.utcoffsetvalue import UTCOffsetValue
 from pycalendar.utils import daysInMonth
-import utils
+from . import utils
 
 """
 Class that maintains a TZ data Rule.
@@ -423,7 +423,7 @@ class Rule(object):
             if end > maxYear:
                 end = maxYear - 1
             self.dt_cache = []
-            for year in xrange(start, end + 1):
+            for year in range(start, end + 1):
                 dt = utils.DateTime(*self.datetimeForYear(year))
                 self.dt_cache.append(dt)
 

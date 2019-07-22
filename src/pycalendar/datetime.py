@@ -21,7 +21,7 @@ from pycalendar.icalendar import definitions
 from pycalendar.parser import ParserContext
 from pycalendar.timezone import Timezone
 from pycalendar.valueutils import ValueMixin
-import cStringIO as StringIO
+import io as StringIO
 import time
 import xml.etree.cElementTree as XML
 
@@ -188,36 +188,40 @@ class DateTime(ValueMixin):
     def __lt__(self, comp):
         return self.compareDateTime(comp) < 0
 
+    def __cmp__(self, a, b):
+        if a == b: return 0
+        return -1 if a < b else 1
+
     def compareDateTime(self, comp):
         if comp is None:
             return 1
         # If either are date only, then just do date compare
         if self.mDateOnly or comp.mDateOnly:
-            c = cmp(self.mYear, comp.mYear)
+            c = self.__cmp__(self.mYear, comp.mYear)
             if c == 0:
-                c = cmp(self.mMonth, comp.mMonth)
+                c = self.__cmp__(self.mMonth, comp.mMonth)
                 if c == 0:
-                    c = cmp(self.mDay, comp.mDay)
+                    c = self.__cmp__(self.mDay, comp.mDay)
             return c
 
         # If they have the same timezone do simple compare - no posix calc
         # needed
         elif (Timezone.same(self.mTZUTC, self.mTZID, comp.mTZUTC, comp.mTZID)):
-            c = cmp(self.mYear, comp.mYear)
+            c = self.__cmp__(self.mYear, comp.mYear)
             if c == 0:
-                c = cmp(self.mMonth, comp.mMonth)
+                c = self.__cmp__(self.mMonth, comp.mMonth)
                 if c == 0:
-                    c = cmp(self.mDay, comp.mDay)
+                    c = self.__cmp__(self.mDay, comp.mDay)
                     if c == 0:
-                        c = cmp(self.mHours, comp.mHours)
+                        c = self.__cmp__(self.mHours, comp.mHours)
                         if c == 0:
-                            c = cmp(self.mMinutes, comp.mMinutes)
+                            c = self.__cmp__(self.mMinutes, comp.mMinutes)
                             if c == 0:
-                                c = cmp(self.mSeconds, comp.mSeconds)
+                                c = self.__cmp__(self.mSeconds, comp.mSeconds)
             return c
 
         else:
-            return cmp(self.getPosixTime(), comp.getPosixTime())
+            return self.__cmp__(self.getPosixTime(), comp.getPosixTime())
 
     def compareDate(self, comp):
         return (self.mYear == comp.mYear) and (self.mMonth == comp.mMonth) and (self.mDay == comp.mDay)
@@ -226,13 +230,13 @@ class DateTime(ValueMixin):
         # Look for cached value (or floating time which has to be calculated
         # each time)
         if (not self.mPosixTimeCached) or self.floating():
-            result = 0L
+            result = 0
 
             # Add hour/mins/secs
-            result = (self.mHours * 60L + self.mMinutes) * 60L + self.mSeconds
+            result = (self.mHours * 60 + self.mMinutes) * 60 + self.mSeconds
 
             # Number of days since 1970
-            result += self.daysSince1970() * 24L * 60L * 60L
+            result += self.daysSince1970() * 24 * 60 * 60
 
             # Adjust for timezone offset
             result -= self.timeZoneSecondsOffset()
